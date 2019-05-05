@@ -1,0 +1,57 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <title>Insert title here</title>
+    <script src="../js/jquery-1.9.1.min.js"></script>
+    <link rel="stylesheet" href="../js/easyui1.5/themes/icon.css"/>
+    <link rel="stylesheet" href="../js/easyui1.5/themes/default/easyui.css"/>
+    <script src="../js/easyui1.5/jquery.easyui.min.js"></script>
+    <script src="../js/easyui1.5/locale/easyui-lang-zh_CN.js"></script>
+    <script src="../js/easyui1.5/util-js.js"></script>
+</head>
+<body>
+<div class="easyui-dialog" data-options="title:'登陆',modal:true,closable:false,buttons:[{
+       text:'登陆',
+       plain:true,
+       handler:function(){
+         login();
+       }
+     },{
+       text:'注册',
+       plain:true,
+       handler:function(){
+         reg();
+       }
+     }]" style="width: 300px;height: 200px" >
+    <form id="userForm" action="./login" method="post">
+        <div style="margin: 10px 0px 0px 10px">
+            <table>
+                <tr>
+                    <td>账号</td>
+                    <td><input class="easyui-textbox" type="text" name="username" /></td>
+                </tr>
+                <tr>
+                    <td>密码</td>
+                    <td><input class="easyui-passwordbox" type="text" name="password" /></td>
+                </tr>
+                <tr>
+                    <td colspan="4">
+                        <center>
+                            <input type="submit" value="登陆"/>
+                            <input type="button" value="注册"/>
+                        </center>
+                    </td>
+                </tr>
+            </table>
+        </div>
+    </form>
+</div>
+</body>
+<script type="text/javascript">
+    /*<![CDATA[*/
+
+    /*]]>*/
+</script>
+</html>

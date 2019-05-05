@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+        xmlns:th="http://www.thymeleaf.org"
+        xmlns:shiro="http://www.pollix.at/thymeleaf/shiro"
+        xmlns:sec="http://www.thymeleaf.org/thymeleaf-extras-springsecurity3">
+<head>
+<meta charset="UTF-8"/>
+    <script src="../js/jquery-1.9.1.min.js"></script>
+    <link rel="stylesheet" href="../js/easyui1.5/themes/icon.css"/>
+    <link rel="stylesheet" href="../js/easyui1.5/themes/default/easyui.css"/>
+    <script src="../js/easyui1.5/jquery.easyui.min.js"></script>
+    <script src="../js/easyui1.5/locale/easyui-lang-zh_CN.js"></script>
+    <script src="../js/easyui1.5/util-js.js"></script>
+<title>Insert title here</title>
+
+</head>
+<body>
+    <div class="easyui-layout" data-options="fit:true">
+        <div data-options="title:'上',region:'north'" style="height: 11%">
+            <font color="crimson" size="7" face="华文琥珀">今</font><font color="darksalmon" size="7" face="华文琥珀">日</font><font color="gold" size="7" face="华文琥珀">头</font><font color="lightblue" size="7" face="华文琥珀">条</font>
+            <div style="float: right;">
+                <!--恭喜登录<div th:text="'欢迎你'+${session.login}">这是谁</div>-->
+                <a href="javascript:logout();" class="easyui-linkbutton">注销</a>
+            </div>
+
+            <span id="city"></span>
+            <span id="high"></span>
+            <span id="low"></span>
+            <span id="fx"></span>
+            <span id="fl"></span>
+            <span id="type"></span>
+            <span id="ymd"></span>
+
+        </div>
+
+        <div data-options="title:'左',region:'west'" style="width: 15%">
+            <div class="easyui-accordion" data-options="fit:true,selected:3">
+                <div title="静态树">
+                    <ul class="easyui-tree">
+                        <li>
+                            <span>北京金科</span>
+                            <ul>
+                                <li><span>JAVA</span></li>
+                                <li><span>测试</span></li>
+                                <li><span>前端</span></li>
+                            </ul>
+                        </li>
+                        <li>
+                            <span>西安金科</span>
+                            <ul>
+                                <li><span>JAVA</span></li>
+                                <li><span>测试</span></li>
+                                <li><span>前端</span></li>
+                            </ul>
+                        </li>
+                        <li>
+                            <span>郑州飞狐</span>
+                            <ul>
+                                <li><span>JAVA</span></li>
+                                <li><span>测试</span></li>
+                                <li><span>前端</span></li>
+                            </ul>
+                        </li>
+                    </ul>
+                </div>
+                <div title="util树">
+                    <ul id="utiltree"></ul>
+                </div>
+                <div title="异步树">
+                    <ul id="asyncTree"></ul>
+                </div>
+                <div title="递归树">
+                    <ul id="myTree"></ul>
+                </div>
+            </div>
+        </div>
+        <div data-options="title:'中',region:'center'" style="width: 70%">
+            <div class="easyui-tabs" data-options="fit:true" id="mytabs">
+                <div title="欢迎">欢迎来到我的系统！</div>
+            </div>
+        </div>
+        <div data-options="title:'右',region:'east'" style="width: 15%"></div>
+        <div data-options="title:'下',region:'south'" style="height: 10%">
+            <br/>
+            <center><a href="#"><font size="3">公司地址</font></a>|<a href="#"><font size="3">联系方式</font></a>|<a href="#"><font size="3">法律信息</font></a>|<a href="#"><font size="3">公司简介</font></a></center>
+        </div>
+    </div>
+</body>
+<script type="text/javascript">
+    /*<![CDATA[*/
+    //递归树
+    $("#myTree").tree({
+        url:"./getMyTree",
+        lines:true,
+        onClick:function(node){
+            if(node.children.length<=0){
+                var exists=$("#mytabs").tabs('exists',node.text);
+                if(exists){
+                    //如果exists为true表示选项卡被打开过
+                    $("#mytabs").tabs('select',node.text);
+                }else{
+                    //动态添加新的选项卡
+                    $("#mytabs").tabs('add',{
+                        title:node.text,
+                        closable:true,
+                        content:createFrame(node.url),
+                        tools:[{
+                            iconCls:'icon-mini-refresh',
+                            handler:function(){
+                                var selectTab=$("#mytabs").tabs('getSelected');
+                                $("#mytabs").tabs('update',{
+                                    tab:selectTab,
+                                    options:{
+                                        content:createFrame(node.url)
+                                    }
+                                })
+                            }
+                        }]
+                    })
+                }
+            }
+
+
+        }
+    })
+
+    //刷新
+    function createFrame(url) {
+        return '<iframe src="'+url+'" frameborder="0" allowfullscreen="true" width="100%" height="100%"></iframe>'
+    }
+    /*]]>*/
+</script>
+</html>

@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.jk.cj.mapper.user.UserMapper">
+	<select id="queryUserByName" parameterType="string" resultType="com.jk.cj.model.user.UserBean" >
+		select * from t_users where userName=#{userName}
+	</select>
+	<!-- 查询用户总条数 -->
+	<select id="queryUserCount" parameterType="map" resultType="int">
+		select count(1) from t_users u
+		<!--<include refid="userWhere"></include> -->
+	</select>
+	<!-- 查询用户 -->
+	<select id="queryUser" parameterType="map" resultType="com.jk.cj.model.user.UserBean">
+		SELECT u.id,u.userName,u.`password`,u.phone FROM t_users u
+		<!-- <include refid="userWhere"></include> -->
+		limit #{start},#{rows}
+	</select>
+	<!--新增用户-->
+	<insert id="addUser" parameterType="com.jk.cj.model.user.UserBean">
+		insert into t_users(userName,password,phone,email)
+	values(#{userName},#{password},#{phone},#{email})
+	</insert>
+</mapper>

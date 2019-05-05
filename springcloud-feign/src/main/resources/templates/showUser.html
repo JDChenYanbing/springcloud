@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+	  xmlns:th="http://www.thymeleaf.org"
+	  xmlns:shiro="http://www.pollix.at/thymeleaf/shiro"
+	  xmlns:sec="http://www.thymeleaf.org/thymeleaf-extras-springsecurity3">
+<head>
+<meta charset="UTF-8"/>
+<title>Insert title here</title>
+</head>
+<script src="../js/jquery-1.9.1.min.js"></script>
+<link rel="stylesheet" href="../js/easyui1.5/themes/icon.css"/>
+<link rel="stylesheet" href="../js/easyui1.5/themes/default/easyui.css"/>
+<script src="../js/easyui1.5/jquery.easyui.min.js"></script>
+<script src="../js/easyui1.5/locale/easyui-lang-zh_CN.js"></script>
+<script src="../js/easyui1.5/util-js.js"></script>
+<body>
+<!-- 条查 -->
+<div id="toolbar">
+	<table>
+		<tr>
+			<td>用户名：</td>
+			<td><input type="text" id="searchUserName" class="easyui-textbox"/></td>
+		</tr>
+		<tr>
+			<td>账号：</td>
+			<td><input type="text" id="searchLoginNumber" class="easyui-textbox"/></td>
+		</tr>
+		<tr>
+			<td>生日：</td>
+			<td>
+			<input type="text" class="easyui-datebox" id="searchStartDate"/>-
+			<input type="text" class="easyui-datebox" id="searchEndDate"/>
+			</td>
+		</tr>
+		<tr>
+			<td colspan="6">
+			<a href="javascript:search()" class="easyui-linkbutton" data-options="iconCls:'icon-search',plain:true">搜索</a>
+			</td>
+		</tr>
+		<tr>
+			<td colspan="8">
+			<a href="javascript:openAddUserDialog()" shiro:hasPermission="user:add" class="easyui-linkbutton" data-options="iconCls:'icon-add',plain:true">新增</a>
+			<a href="javascript:deleteAll()" class="easyui-linkbutton" data-options="iconCls:'icon-remove',plain:true">批量删除</a>
+			</td>
+		</tr>
+	</table>
+</div>
+	<!-- 定义datagrid在页面的位置 -->
+	<table id="userTable"></table>
+	<!-- 新增与修改的弹框 -->
+	<div id="userDialog" class="easyui-dialog" data-options="title:'新增图书',modal:true,closed:true,minimizable:true,maximizable:true,buttons:[{
+	text:'保存',
+	plain:true,
+	iconCls:'icon-save',
+	handler:function(){
+	saveUser();
+	}
+	},{
+	text:'关闭',
+	plain:true,
+	iconCls:'icon-cancel',
+	handler:function(){
+	closeUserDialog();
+	}
+}]" style="width: 750px;height: 520px">
+<div style="margin: 10px 0px 0px 10px">
+	<form id="userForm" method="post">
+		<table>
+			<tr>
+				<td>用户名：</td>
+				<td>
+				<input type="text" class="easyui-textbox" name="userName"/>
+				<input type="hidden" class="easyui-textbox" name="id"/>
+				</td>
+			</tr>
+
+			<tr>
+				<td>密码：</td>
+				<td>
+				<input type="text" class="easyui-passwordbox" name="password"/>
+				</td>
+			</tr>
+			<tr>
+				<td>手机：</td>
+				<td>
+				 <input type="text" class="easyui-textbox" name="phone"/>
+				</td>
+			</tr>
+			<tr>
+				<td>邮箱：</td>
+				<td>
+					<input type="text" class="easyui-textbox" name="email"/>
+				</td>
+			</tr>
+		</table>
+	</form>
+</div>
+</div>
+</body>
+<script type="text/javascript">
+/*<![CDATA[*/
+/* 总方法 */
+$(function() {
+	initUser();
+})
+
+//查询用户列表
+function initUser() {
+	$("#userTable").datagrid({
+		url:'./queryUser',
+		toolbar:'#toolbar',
+		fit:true,
+		pagination:true,
+		/* pagePosition:'both', */
+		//单选
+		//singleSelect:true,
+		pageSize:5,
+		pageList:[2,3,4,5,10],
+		columns:[
+			[
+			{field:'123',checkbox:true},
+			{field:'id',title:'编号'},
+			{field:'userName',title:'用户名'},
+			{field:'password',title:'密码'},
+			{field:'phone',title:'手机'},
+			{field:'email',title:'邮箱'},
+			{field:'456',title:'操作',formatter:function(value,row,index){
+				var html="<a href='javascript:editUser("+row.id+")'>修改</a>|";
+				html+="<a href='javascript:deleteUser("+row.id+")'>删除</a>";
+				return html;
+			}}
+		]
+			]
+	})
+}
+
+//条查
+function search() {
+	var searchUserName=$("#searchUserName").textbox('getValue');
+	var searchLoginNumber=$("#searchLoginNumber").textbox('getValue');
+	var searchStartDate=$("#searchStartDate").datebox('getValue');
+	var searchEndDate=$("#searchEndDate").datebox('getValue');
+	$("#userTable").datagrid('load',{
+		name:searchUserName,
+		loginNumber:searchLoginNumber,
+		startDate:searchStartDate,
+		endDate:searchEndDate
+	})
+} 
+
+
+
+//打开新增弹框
+function openAddUserDialog() {
+	//每次打开弹框清空内容
+	$("#userForm").form('reset');
+	$("#userDialog").dialog({
+		title:'新增用户',
+		iconCls:'icon-add',
+		closed:false
+	})
+}
+
+//新增用户
+function saveUser() {
+	//提交之前将富文本编辑器的内容放到隐藏文本域中
+	$("#userForm").form('submit',{
+		url:'./addUser',
+		success:function(data){
+			if(data){
+				$("#userDialog").dialog('close');
+				$("#userTable").datagrid('reload');
+			}else{
+				$.messager.alert('提示','新增失败','warning')
+			}
+		}
+	})
+}
+//批量删除
+function deleteAll() {
+	var users=$("#userTable").datagrid('getSelections');
+	if(users.length<=0){
+		$.messager.alert('提示','请选择你要删除的数据','question');
+		return;
+	}
+	$.messager.confirm('提示','您确定要删除吗？',function(r){
+		if(r){
+			var ids="";
+			for (var i in users) {
+				ids+=ids==""?users[i].id:','+users[i].id;
+			}
+			$.ajax({
+				url:'../user/deleteAll.do',
+				type:'post',
+				data:{ids:ids},
+				dataType:'json',
+				success:function(data){
+					if(data){
+						search();
+					}else{
+						$.messager.alert('提示','删除失败','error')
+					}
+				}
+			})
+		}
+	})
+}
+//单删
+function deleteUser(id) {
+	$.messager.confirm('提示','您确定要删除吗？',function(r){
+		if(r){
+			$.ajax({
+				url:'../user/deleteAll.do',
+				type:'post',
+				data:{ids:id},
+				dataType:'json',
+				success:function(data){
+					if(data){
+						search();
+					}else{
+						$.messager.alert('提示','删除失败','error')
+					}
+				}
+			})
+		}
+	})
+}
+//修改用户回显
+function editUser(id) {
+	$.ajax({
+		url:'../user/queryUserById.do',
+		type:'post',
+		data:{id:id},
+		dataType:'json',
+		success:function(data){
+			//alert(data.id)
+			
+			$("#userForm").form('load',data);
+			//特殊回显
+			$("#testimg").attr('src',data.headImg);
+			editor.html(data.detail);
+		}
+			})
+			//对需要从数据库查询的东西进行再初始化
+			initRole();
+			initSearchDept();
+			initArea();
+			$("#userDialog").dialog({
+				title:'修改图书',
+				iconCls:'icon-edit',
+				closed:false
+	})
+}
+
+
+var editor = null;
+KindEditor.ready(function(K) {//将编辑器添加到文档中
+	editor = K.create('#content', {
+		cssPath : '<%=request.getContextPath()%>/js/kindeditor/plugins/code/prettify.css',//指定编辑器iframe document的CSS文件，用于设置可视化区域的样式。
+		uploadJson : '<%=request.getContextPath()%>/js/kindeditor/jsp/upload_json.jsp', //指定上传文件的服务器端程序。
+		fileManagerJson : '<%=request.getContextPath()%>/js/kindeditor/jsp/file_manager_json.jsp',//指定浏览远程图片的服务器端程序。
+		allowFileManager : true,  //true时显示浏览远程服务器按钮 ;默认值: false  
+		afterCreate : function() {
+			var self = this;
+			K.ctrl(document, 13, function() {
+				self.sync();
+				document.forms['example'].submit();
+			});
+			K.ctrl(self.edit.doc, 13, function() {
+				self.sync();
+				document.forms['example'].submit();
+			});
+		}
+	});
+	prettyPrint();
+}) 
+/*]]>*/
+</script>
+</html>
